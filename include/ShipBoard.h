@@ -4,7 +4,9 @@
 
 #define BOARD_SIZE 10
 
-typdef enum {
+const char *shipString[] = {"  ", "DT", "SB", "CR", "BP", "CA", "X "};
+
+typedef enum {
     DESTROYED = 6, // X
     EMPTY = 0,
     DESTROYER = 1, // DT
@@ -15,14 +17,19 @@ typdef enum {
 } ShipType;
 
 typedef struct {
-    ShipType shipboard[BOARD_SIZE][BOARD_SIZE];
+    int Rows;
+    int Cols;
+    ShipType *cells;
 } ShipBoard;
 
 
-void initializeShipBoard(ShipBoard* shipboard);
-void printShipBoard(ShipBoard* shipboard);
+
+ShipBoard* initializeShipBoard(void);
+ShipType getShipAtLocation(ShipBoard* board, int row, int col);
+void printShipBoard(ShipBoard* board);
+int isPlacementEmpty(ShipBoard* board, int r1, int c1, int r2, int c2);
 int placeShip(ShipBoard* shipboard, char row, int col, ShipType ship);
-int areAllShipsDestroyed(ShipBoard* shipboard);
+int areAllShipsDestroyed(ShipBoard* board);
 #endif
 
 

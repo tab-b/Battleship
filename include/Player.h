@@ -14,6 +14,9 @@ typedef struct {
 
 void initializePlayer(Player* player, char* name);
 int shipPlacementSequence(Player* player);
+int validateInput()
 int attackSequence(Player* attacker, Player* defender, char row, int col);
 int hasPlayerLost(Player* player);
+
+
 #endif
