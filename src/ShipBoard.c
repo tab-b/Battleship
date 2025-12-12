@@ -118,10 +118,10 @@ int placeShip(ShipBoard* board, int r1, int c1, int r2, int c2, ShipType ship) {
             int endingRow = r1 > r2 ? r1 : r2;
 
             for(row = startingRow; row <= endingRow; row++) {
-                if(PlaceShipSegment(board, row, c1, ship, CHECK) == 0) return 0;
+                if(placementLogicHelper(board, row, c1, ship, CHECK) == 0) return 0;
             }
             for(row = startingRow; row <= endingRow; row++) {
-                PlaceShipSegment(board, row, c1, ship, WRITE);
+                placementLogicHelper(board, row, c1, ship, WRITE);
             }
             return 1;
         default: // neither vertical nor horizontal

@@ -11,10 +11,12 @@ typedef enum {
 } HitStatus;
 
 typedef struct {
-    HitStatus atkboard[BOARD_SIZE][BOARD_SIZE];
+    int Rows;
+    int Cols;
+    HitStatus* cells;
 } AttackBoard;
 
-void initializeAttackBoard(AttackBoard* atkboard);
+HitStatus* initializeAttackBoard(void);
 void printAttackBoard(AttackBoard* atkboard);
 int wasAttackAlreadyAttempted(AttackBoard* atkboard, char row, int col);
 int updateAttackBoard(AttackBoard* atkboard, char row, int col, HitStatus status);
