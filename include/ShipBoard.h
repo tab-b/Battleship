@@ -16,6 +16,11 @@ typedef enum {
     CARRIER = 5, // CA
 } ShipType;
 
+typedef enum {
+    HORIZONTAL,
+    VERTICAL,
+} PlacementType;
+
 typedef struct {
     int Rows;
     int Cols;
@@ -27,8 +32,8 @@ typedef struct {
 ShipBoard* initializeShipBoard(void);
 ShipType getShipAtLocation(ShipBoard* board, int row, int col);
 void printShipBoard(ShipBoard* board);
-int isPlacementEmpty(ShipBoard* board, int r1, int c1, int r2, int c2);
-int placeShip(ShipBoard* shipboard, char row, int col, ShipType ship);
+// int isPlacementEmpty(ShipBoard* board, int r1, int c1, int r2, int c2);
+int placeShip(ShipBoard* shipboard, int r1, int c1, int r2, int c2, ShipType ship);
 int areAllShipsDestroyed(ShipBoard* board);
 #endif
 

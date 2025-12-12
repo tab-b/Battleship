@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "ShipBoard.h"
 
 ShipBoard* initializeShipBoard(void) {
@@ -26,6 +27,10 @@ static inline int getIndex(ShipBoard* board, int row, int col) {
     return row * board->Cols + col;
 }
 
+static inline void updateBoard(ShipBoard* board, int location, ShipType ship) {
+    board->cells[location] = ship;
+}
+
 ShipType getShipAtLocation(ShipBoard* board, int row, int col) {
     return board->cells[getIndex(board, row, col)];
 }
@@ -43,31 +48,61 @@ void printShipBoard(ShipBoard* board) {
     }
 }
 
-int isPlacementEmpty(ShipBoard* board, int r1, int c1, int r2, int c2) {
-    if(r1 == r2) { // horizontal
-        /**
-         * if the rows are the same (horizontal placement)
-         * Get the min and max between the two inputted columns,
-         * check if each grid space (starting from minimumColol to maximumColol) is NOT empty
-         * return 0 for not empty
-         */
-        int minimumCol = c1 < c2 ? c1 : c2; // if c1 less than c2, min = c1 else c2
-        int maximumCol = c1 > c2 ? c1 : c2; // if c1 > c2, max = c1, else c2
-        for(int c = minimumCol; c <= maximumCol; c++)
-            if(getShipAtLocation(board, r1, c) != EMPTY) return 0;
-    } else if(c1 == c2) { // vertical
-        /**
-         * if the columns are the same (vertical placement),
-         * Get the min and max between the two inputted rows,
-         * check if each grid space is NOT empty
-         * return 0 for not empty
-         */
-        int minimumRow = r1 < r2 ? r1 : r2;
-        int maximumRow = r1 > r2 ? r1 : r2;
-        for(int r = minimumRow; r <= maximumRow; r++)
-            if(getShipAtLocation(board, r, c1) != EMPTY) return 0;
-    } else {
-        return 0; // not straight
-    }
+PlacementType verticalOrHorizontal(int r1, int c1, int r2, int c2) {
+    if(r1 == r2) return HORIZONTAL;
+    return VERTICAL;
+}
+
+ShipType isLocationEmpty(ShipBoard* board, int row, int col) {
+    return getShipAtLocation(board, row, col) == EMPTY;
+}
+
+int placementLogicHelper(ShipBoard* board, int starting, int ending, ShipType ship) { 
+    if(isLocationEmpty(board, starting, ending) != EMPTY) return 0;
+    int location = getIndex(board, starting, ending);
+    updateBoard(board, location, ship);
     return 1;
+}
+
+int placeShip(ShipBoard* board, int r1, int c1, int r2, int c2, ShipType ship) {
+    PlacementType type = verticalOrHorizontal(r1, c1, r2, c2);
+    int location;
+    switch(type) { 
+        case HORIZONTAL:// horizontal
+            /**
+             * if the rows are the same (horizontal placement)
+             * Get the min and max between the two inputted columns,
+             * check if each grid space (starting from startingCol to endingCol) is NOT empty
+             * return 0 for not empty
+             */
+            int startingCol = c1 < c2 ? c1 : c2; // if c1 less than c2, min = c1 else c2
+            int endingCol = c1 > c2 ? c1 : c2; // if c1 > c2, max = c1, else c2
+            while(startingCol <= endingCol) {
+                if(placementLogicHelper(board, startingCol, endingCol, ship) == 0) return 0;
+                startingCol++;
+            }
+        case VERTICAL: // vertical
+            /**
+             * if the columns are the same (vertical placement),
+             * Get the min and max between the two inputted rows,
+             * check if each grid space is NOT empty
+             * return 0 for not empty
+             */
+            int startingRow = r1 < r2 ? r1 : r2;
+            int endingRow = r1 > r2 ? r1 : r2;
+            while(startingCol <= endingCol) {
+                if(placementLogicHelper(board, startingRow, endingRow, ship) == 0) return 0;
+                startingRow++;
+            }
+        default: // neither vertical or horizontal
+            return 0; 
+    }
+}
+
+int areAllShipsDestroyed(ShipBoard* board) {
+    int count = 0;
+    for(int i = 0; i < pow(BOARD_SIZE, BOARD_SIZE); i++) {
+        if(board->cells[i] == DESTROYED) count += 1;
+    }
+    return count == 15;
 }
