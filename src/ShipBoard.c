@@ -61,7 +61,8 @@ void printShipBoard(ShipBoard* board) {
 PlacementType verticalOrHorizontal(int r1, int c1, int r2, int c2, ShipType ship) {
     int len = ship;
     if(r1 == r2 && (abs(c2 - c1) + 1) == len) return HORIZONTAL;
-    return VERTICAL;
+    else if(c1 == c2 && (abs(r2 - r1) + 1) == len) return VERTICAL;
+    return -1;
 }
 
 ShipType isLocationEmpty(ShipBoard* board, int row, int col) {
