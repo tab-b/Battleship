@@ -21,6 +21,11 @@ typedef enum {
     VERTICAL,
 } PlacementType;
 
+typedef enum {
+    CHECK,
+    WRITE
+} ShipPlaceMode;
+
 typedef struct {
     int Rows;
     int Cols;
@@ -28,13 +33,23 @@ typedef struct {
 } ShipBoard;
 
 
-
+/**
+ * @brief Allocates and intitializes a new ShipBoard for the game
+ * Creates a ShipBoard with fixed dimensions (BOARD_SIZE x BOARD_SIZE),
+ * allocates a 1D array of ShipType cells, and sets all cells to EMPTY.
+ * Exits the program on allocation failure and using perror and free where possible.
+ * 
+ * @return ShipBoard* Pointer to the the initialized ShipBoard, or program terminates on error.
+ * @note Caller must free the returned board using a corresponding free function
+ * @note BOARD_SIZE must be defined before use
+ */
 ShipBoard* initializeShipBoard(void);
 ShipType getShipAtLocation(ShipBoard* board, int row, int col);
 void printShipBoard(ShipBoard* board);
-// int isPlacementEmpty(ShipBoard* board, int r1, int c1, int r2, int c2);
-int placeShip(ShipBoard* shipboard, int r1, int c1, int r2, int c2, ShipType ship);
+int placeShip(ShipBoard* shipboard,  int r1, int c1, int r2, int c2, ShipType ship);
+int attackShip(ShipBoard* board, int row, int col);
 int areAllShipsDestroyed(ShipBoard* board);
+void freeBoard(ShipBoard* board);
 #endif
 
 

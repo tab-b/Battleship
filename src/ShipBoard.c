@@ -2,6 +2,16 @@
 #include <math.h>
 #include "ShipBoard.h"
 
+/**
+ * Allocates ShipBoard struct and cells array using malloc.
+ * Initializes dimensions to BOARD_SIZE x BOARD_SIZE and all cells to EMPTY.
+ * on any malloc error: perror message, free prior allcations, exit
+ * 
+ * @note 1D array for cells: index = row * BOARD_SIZE + col.
+ * @note relies on BOARD_SIZE macro; undefined behavior if not set
+ * @warning exist program on error — do not use in signal handlers
+ * 
+ */
 ShipBoard* initializeShipBoard(void) {
     ShipBoard* board = malloc(sizeof(ShipBoard));
     if(board == NULL) {
@@ -48,8 +58,9 @@ void printShipBoard(ShipBoard* board) {
     }
 }
 
-PlacementType verticalOrHorizontal(int r1, int c1, int r2, int c2) {
-    if(r1 == r2) return HORIZONTAL;
+PlacementType verticalOrHorizontal(int r1, int c1, int r2, int c2, ShipType ship) {
+    int len = ship;
+    if(r1 == r2 && (abs(c2 - c1) + 1) == len) return HORIZONTAL;
     return VERTICAL;
 }
 
@@ -57,16 +68,26 @@ ShipType isLocationEmpty(ShipBoard* board, int row, int col) {
     return getShipAtLocation(board, row, col) == EMPTY;
 }
 
-int placementLogicHelper(ShipBoard* board, int starting, int ending, ShipType ship) { 
+static int placementLogicHelper(ShipBoard* board, int starting, int ending, ShipType ship, ShipPlaceMode mode) { 
     if(isLocationEmpty(board, starting, ending) != EMPTY) return 0;
+    if(mode == CHECK) return 1;
+    
     int location = getIndex(board, starting, ending);
     updateBoard(board, location, ship);
     return 1;
 }
 
+
 int placeShip(ShipBoard* board, int r1, int c1, int r2, int c2, ShipType ship) {
-    PlacementType type = verticalOrHorizontal(r1, c1, r2, c2);
-    int location;
+    int len = ship;
+    if(len == 1) {
+        if(placementLogicHelper(board, r1, c1, ship, CHECK) == 0) return 0;
+        placementLogicHelper(board, r1, c1, ship, WRITE);
+        return 1;
+    }
+    
+    PlacementType type = verticalOrHorizontal(r1, c1, r2, c2, ship);
+    int row, col;
     switch(type) { 
         case HORIZONTAL:// horizontal
             /**
@@ -77,10 +98,14 @@ int placeShip(ShipBoard* board, int r1, int c1, int r2, int c2, ShipType ship) {
              */
             int startingCol = c1 < c2 ? c1 : c2; // if c1 less than c2, min = c1 else c2
             int endingCol = c1 > c2 ? c1 : c2; // if c1 > c2, max = c1, else c2
-            while(startingCol <= endingCol) {
-                if(placementLogicHelper(board, startingCol, endingCol, ship) == 0) return 0;
-                startingCol++;
+
+            for(col = startingCol; col <= endingCol; col++) {
+                if(placementLogicHelper(board, r1, col, ship, CHECK) == 0) return 0;
             }
+            for(col = startingCol; col <= endingCol; col++) {
+                placementLogicHelper(board, r1, col, ship, WRITE);
+            }
+            return 1;
         case VERTICAL: // vertical
             /**
              * if the columns are the same (vertical placement),
@@ -90,19 +115,36 @@ int placeShip(ShipBoard* board, int r1, int c1, int r2, int c2, ShipType ship) {
              */
             int startingRow = r1 < r2 ? r1 : r2;
             int endingRow = r1 > r2 ? r1 : r2;
-            while(startingCol <= endingCol) {
-                if(placementLogicHelper(board, startingRow, endingRow, ship) == 0) return 0;
-                startingRow++;
+
+            for(row = startingRow; row <= endingRow; row++) {
+                if(PlaceShipSegment(board, row, c1, ship, CHECK) == 0) return 0;
             }
-        default: // neither vertical or horizontal
+            for(row = startingRow; row <= endingRow; row++) {
+                PlaceShipSegment(board, row, c1, ship, WRITE);
+            }
+            return 1;
+        default: // neither vertical nor horizontal
             return 0; 
     }
 }
 
+int attackShip(ShipBoard* board, int row, int col) {
+    ShipType shipAtInput = getShipAtLocation(board, row, col);
+    if(shipAtInput == EMPTY || shipAtInput == DESTROYED) return 0; // MISS
+    return 1; // HIT
+}
+
+
 int areAllShipsDestroyed(ShipBoard* board) {
-    int count = 0;
     for(int i = 0; i < pow(BOARD_SIZE, BOARD_SIZE); i++) {
-        if(board->cells[i] == DESTROYED) count += 1;
+        // if cell is neither destroyed nor empty, it must be a ship, therefore not all ships destroyed
+        if(board->cells[i] != DESTROYED && board->cells[i] != EMPTY) return 0;
     }
-    return count == 15;
+    return 1;
+}
+
+void freeBoard(ShipBoard* board) {
+    if(!board) return;
+    free(board->cells);
+    free(board);
 }
