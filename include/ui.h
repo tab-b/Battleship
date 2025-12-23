@@ -2,11 +2,13 @@
 #define UI_H
 
 #include "Player.h"
+#include "ShipBoard.h"
+#include "AttackBoard.h"
 
 void displayMainMenu();
 
-void printShipBoard(Player* player);
-void printAttackBoard(Player* player);
+void UIPrintShipBoard(Player* player);
+void UIPrintAttackBoard(Player* player);
 
 void promptForShipPlacement(Player* player);
 void promptForAttack(Player* attacker, Player* defender);

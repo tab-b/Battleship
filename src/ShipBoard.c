@@ -12,8 +12,8 @@
  * @warning exist program on error — do not use in signal handlers
  * 
  */
-ShipBoard* initializeShipBoard(void) {
-    ShipBoard* board = malloc(sizeof(ShipBoard));
+void initializeShipBoard(ShipBoard* board) {
+    board = malloc(sizeof(ShipBoard));
     if(board == NULL) {
         perror("Allocation failed!");
         exit(1);
@@ -51,7 +51,7 @@ void printShipBoard(ShipBoard* board) {
     for(int col = 0; col < BOARD_SIZE; col++) printf("%2d ", col);
     printf("\n");
     for(int i = 0; i < BOARD_SIZE; i++) {
-        printf("%c: ", 'A' + 1);
+        printf("%c: ", 'A' + i);
         for(int j = 0; j < BOARD_SIZE; j++) {
             printf("%s|", shipString[getShipAtLocation(board, i, j)]);
         }

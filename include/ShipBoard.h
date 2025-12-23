@@ -43,7 +43,7 @@ typedef struct {
  * @note Caller must free the returned board using a corresponding free function
  * @note BOARD_SIZE must be defined before use
  */
-ShipBoard* initializeShipBoard(void);
+void initializeShipBoard(ShipBoard* board);
 ShipType getShipAtLocation(ShipBoard* board, int row, int col);
 void printShipBoard(ShipBoard* board);
 int placeShip(ShipBoard* shipboard,  int r1, int c1, int r2, int c2, ShipType ship);

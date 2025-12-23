@@ -4,6 +4,8 @@
 
 #define BOARD_SIZE 10
 
+const char *attackString[] = {"  ", "H ", "M "}; 
+
 typedef enum {
     NOT_TRIED = 0,
     HIT = 1,
@@ -16,9 +18,10 @@ typedef struct {
     HitStatus* cells;
 } AttackBoard;
 
-HitStatus* initializeAttackBoard(void);
-void printAttackBoard(AttackBoard* atkboard);
-int wasAttackAlreadyAttempted(AttackBoard* atkboard, char row, int col);
-int updateAttackBoard(AttackBoard* atkboard, char row, int col, HitStatus status);
+void initializeAttackBoard(AttackBoard* board);
+void printAttackBoard(AttackBoard* board);
+int wasAttackAlreadyAttempted(AttackBoard* board, int row, int col);
+int updateAttackBoard(AttackBoard* atkboard, int row, int col, HitStatus status);
+void freeBoard(AttackBoard* board);
 
 #endif
