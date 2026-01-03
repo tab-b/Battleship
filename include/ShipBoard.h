@@ -16,7 +16,7 @@ typedef enum {
     CARRIER = 5, // CA
 } ShipType;
 
-enum ShipType ships[] = {DESTROYER, SUBMARINE, CRUISER, BATTLESHIP, CARRIER};
+extern ShipType ships[];
 
 typedef enum {
     HORIZONTAL,
