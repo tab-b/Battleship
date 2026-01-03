@@ -16,6 +16,8 @@ typedef enum {
     CARRIER = 5, // CA
 } ShipType;
 
+enum ShipType ships[] = {DESTROYER, SUBMARINE, CRUISER, BATTLESHIP, CARRIER};
+
 typedef enum {
     HORIZONTAL,
     VERTICAL,
@@ -49,6 +51,7 @@ void printShipBoard(ShipBoard* board);
 int placeShip(ShipBoard* shipboard,  int r1, int c1, int r2, int c2, ShipType ship);
 int attackShip(ShipBoard* board, int row, int col);
 int areAllShipsDestroyed(ShipBoard* board);
+int checkRangeIfEmpty(ShipBoard* board, int r1, int c1, int r2, int c2);
 void freeBoard(ShipBoard* board);
 #endif
 

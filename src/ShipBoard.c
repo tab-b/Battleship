@@ -2,6 +2,7 @@
 #include <math.h>
 #include "ShipBoard.h"
 
+ShipType ships[] = {DESTROYER, SUBMARINE, CRUISER, BATTLESHIP, CARRIER};
 /**
  * Allocates ShipBoard struct and cells array using malloc.
  * Initializes dimensions to BOARD_SIZE x BOARD_SIZE and all cells to EMPTY.
@@ -68,6 +69,44 @@ PlacementType verticalOrHorizontal(int r1, int c1, int r2, int c2, ShipType ship
 ShipType isLocationEmpty(ShipBoard* board, int row, int col) {
     return getShipAtLocation(board, row, col) == EMPTY;
 }
+/**
+ * @brief Check if range of coordinates does not have a ship placed there
+ * 
+ * @param board player's board
+ * @param r1 row 1
+ * @param c1 col 1
+ * @param r2 row 2
+ * @param c2 col 2
+ * @return int 1 if empty, 0 if any 1 of the coordinates in the range is not empty (aka a ship is already placed there)
+ */
+int checkRangeIfEmpty(ShipBoard* board, int r1, int c1, int r2, int c2) {
+    if(r1 == r2) { // horizontal
+        /**
+         * if the rows are the same (horizontal placement)
+         * Get the min and max between the two inputted columns,
+         * check if each grid space (starting from minimumColol to maximumColol) is NOT empty
+         * return 0 for not empty
+         */
+        int minimumCol = c1 < c2 ? c1 : c2; // if c1 less than c2, min = c1 else c2
+        int maximumCol = c1 > c2 ? c1 : c2; // if c1 > c2, max = c1, else c2
+        for(int c = minimumCol; c <= maximumCol; c++)
+            if(isLocationEmpty(board, r1, c) != EMPTY) return 0;
+    } else if(c1 == c2) { // vertical
+        /**
+         * if the columns are the same (vertical placement),
+         * Get the min and max between the two inputted rows,
+         * check if each grid space is NOT empty
+         * return 0 for not empty
+         */
+        int minimumRow = r1 < r2 ? r1 : r2;
+        int maximumRow = r1 > r2 ? r1 : r2;
+        for(int r = minimumRow; r <= maximumRow; r++)
+            if(isLocationEmpty(board, c1, r) != EMPTY) return 0;
+    } else {
+        return 0; // not straight
+    }
+    return 1;
+}
 
 static int placementLogicHelper(ShipBoard* board, int starting, int ending, ShipType ship, ShipPlaceMode mode) { 
     if(isLocationEmpty(board, starting, ending) != EMPTY) return 0;
@@ -77,7 +116,6 @@ static int placementLogicHelper(ShipBoard* board, int starting, int ending, Ship
     updateBoard(board, location, ship);
     return 1;
 }
-
 
 int placeShip(ShipBoard* board, int r1, int c1, int r2, int c2, ShipType ship) {
     int len = ship;
