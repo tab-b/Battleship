@@ -1,59 +1,61 @@
 #include <stdio.h>
-#include "AttackBoard.h"
-#include "ShipBoard.h"
+#include <stdlib.h>
 #include "Player.h"
-#include <string.h>
 
-void initializePlayer(Player *player, char* name) {
-    strncpy(player->name, name, sizeof(player->name - 1));
-    player->name[sizeof(player->name) - 1] = '\0';
+void initializePlayer(Player *player, const char *name) {
+    snprintf(player->name, sizeof(player->name), "%s", name);
     initializeShipBoard(&player->shipboard);
     initializeAttackBoard(&player->atkboard);
-
-    player->wins = 0;
-    player->losses = 0;
+    player->wins = player->losses = 0;
 }
 
-int hasPlayerLost(Player* player) {
+void freePlayer(Player *player) {
+    if(!player) return;
+    freeShipBoard(&player->shipboard);
+    freeAttackBoard(&player->atkboard);
+}
+
+int hasPlayerLost(const Player *player) {
     return areAllShipsDestroyed(&player->shipboard);
 }
 
-void generateValidRandomLocation(Player* computer, enum ShipType shipType, int *out_row1, int *out_col1, int *out_row2, int *out_col2) {
-    int shipSize = shipType;
-    int verticalOrHorizontal = rand() % 2; // 0 = horizontal, 1 = vertical
-    int row1;
-    int col1;
-    int row2;
-    int col2;
-    if(verticalOrHorizontal == 0) { // horizontal 
-        // generate locations as long as said location is occupied (invalid)
-        row1 = row2 = rand() % 10; // generate random # from 0 (representing row A) to 9 (representing row J)
+void autoPlacement(Player *player) {
+    for(int i = 0; i < SHIP_COUNT; ++i) {
+        int r1, c1, r2, c2;
         do {
-            col1 = rand() % (10 - shipSize + 1); // columns 0 to size of said ship
-            col2 = shipSize - 1 + col1; // col2 must be size of ship minus 1 + col1 to get correction location of the correct size
-        } while(checkRangeIfEmpty(&computer->shipboard, row1, col1, row2, col2) == 0); 
-    } else { // vertical
-        col1 = col2 = rand() % 10;
-        do {
-            // generate radnom number from 0 to size of ship - 1
-            row1 = rand() % (10 - shipSize + 1);
-            row2 = shipSize - 1 + row1;
-        } while(checkRangeIfEmpty(&computer->shipboard, row1, col1, row2, col2) == 0);
+            int vertical = rand() % 2;
+            r1 = rand() % (BOARD_SIZE - (vertical ? (int)ships[i] - 1 : 0));
+            c1 = rand() % (BOARD_SIZE - (vertical ? 0 : (int)ships[i] - 1));
+            r2 = r1 + (vertical ? (int)ships[i] - 1 : 0);
+            c2 = c1 + (vertical ? 0 : (int)ships[i] - 1);
+        } while(!placeShip(&player->shipboard, r1, c1, r2, c2, ships[i]));
     }
-    *out_row1 = row1;
-    *out_col1 = col1;
-    *out_row2 = row2;
-    *out_col2 = col2;
 }
 
+int attackPlayer(Player *attacker, Player *defender, int row, int col) {
+    if(row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1;
+    if(wasAttackAlreadyAttempted(&attacker->atkboard, row, col)) return -1;
+    int hit = attackShip(&defender->shipboard, row, col);
+    updateAttackBoard(&attacker->atkboard, row, col, hit ? HIT : MISS);
+    return hit;
+}
 
-void autoPlacement(Player* computer) {
-    int row1;
-    int col1;
-    int row2;
-    int col2;
-    for(int i = 0; i < 5; i++) {
-        generateValidRandomLocation(computer, ships[i], row1, col1, row2, col2);
-        placeShip(&computer->shipboard, row1, col1, row2, col2, ships[i]);
+int computerAttack(Player *computer, Player *defender, int *row, int *col) {
+    /* Choose among remaining cells, including when only one remains. */
+    int remaining = 0;
+    for(int r = 0; r < BOARD_SIZE; ++r)
+        for(int c = 0; c < BOARD_SIZE; ++c)
+            if(!wasAttackAlreadyAttempted(&computer->atkboard, r, c)) ++remaining;
+    if(!remaining) return -1;
+    int choice = rand() % remaining;
+    for(int r = 0; r < BOARD_SIZE; ++r) {
+        for(int c = 0; c < BOARD_SIZE; ++c) {
+            if(!wasAttackAlreadyAttempted(&computer->atkboard, r, c) && choice-- == 0) {
+                *row = r;
+                *col = c;
+                return attackPlayer(computer, defender, r, c);
+            }
+        }
     }
+    return -1;
 }

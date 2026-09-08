@@ -1,18 +1,17 @@
 #ifndef UI_H
 #define UI_H
-
 #include "Player.h"
-#include "ShipBoard.h"
-#include "AttackBoard.h"
 
-void displayMainMenu();
+typedef enum {
+    INPUT_ERROR = -1, INPUT_QUIT = 0, INPUT_VALID = 1, GAME_COMPLETE = 2
+} GameStatus;
 
-void UIPrintShipBoard(Player* player);
-void UIPrintAttackBoard(Player* player);
-
-void promptForShipPlacement(Player* player);
-void promptForAttack(Player* attacker, Player* defender);
-
-void ending(Player* winner, Player* loser);
-
+void displayMainMenu(const char *program);
+void printShipBoard(const ShipBoard *board);
+void printAttackBoard(const AttackBoard *board);
+void UIPrintShipBoard(const Player *player);
+void UIPrintAttackBoard(const Player *player);
+GameStatus promptForShipPlacement(Player *player);
+GameStatus promptForAttack(const Player *attacker, int *row, int *col);
+void ending(Player *winner, Player *loser);
 #endif

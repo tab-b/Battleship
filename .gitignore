@@ -1,0 +1,7 @@
+.env
+
+/battleship
+/tests/
+/tests/test_boards
+*.o
+__pycache__/

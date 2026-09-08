@@ -1,65 +1,35 @@
 #include <stdio.h>
-#include <math.h>
+#include <stdlib.h>
 #include "AttackBoard.h"
 
-void initializeAttackBoard(AttackBoard* board) {
-    board = malloc(sizeof(AttackBoard));
-    if(!board) {
-        perror("Allocation failed");
-        exit(1);
-    }
-    board->Rows = BOARD_SIZE;
-    board->Cols = BOARD_SIZE;
-    board->cells = malloc(board->Rows * board->Cols * sizeof(HitStatus));
-
+void initializeAttackBoard(AttackBoard *board) {
+    board->Rows = board->Cols = BOARD_SIZE;
+    board->cells = calloc((size_t)board->Rows * board->Cols, sizeof(*board->cells));
     if(!board->cells) {
-        perror("Cell allocation failed!");
-        free(board);
-        exit(1);
-    }
-
-    for(int i = 0; i < pow(BOARD_SIZE, BOARD_SIZE); i++) {
-        board->cells[i] = NOT_TRIED;
-    }
-    return board;
-}
-
-static inline int getIndex(AttackBoard* board, int row, int col) {
-    return row * board->Cols + col;
-}
-
-HitStatus getAttackAtLocation(AttackBoard* board, int row, int col) {
-    return board->cells[getIndex(board, row, col)];
-}
-
-void printAttackBoard(AttackBoard* board) {
-    printf("Attack board:\n");
-    printf("   ");
-    for(int col = 0; col < BOARD_SIZE; col++) printf("%2d ", col);
-    printf("\n");
-    for(int i = 0; i < BOARD_SIZE; i++) {
-        printf("%c: ", 'A' + i);
-        for(int j = 0; j < BOARD_SIZE; j++) {
-            printf("%s|", attackString[getAttackAtLocation(board, i, j)]);
-        }
+        perror("Attack board allocation failed");
+        exit(EXIT_FAILURE);
     }
 }
 
-int wasAttackAlreadyAttempted(AttackBoard* board, int row, int col) {
-    HitStatus attack = getAttackAtLocation(board, row, col);
-    return (attack != NOT_TRIED); // if attack doesn't equal not tried, it was tried. 
-}
-
-int updateAttackBoard(AttackBoard* board, int row, int col, HitStatus status) {
-    if(wasAttackAlreadyAttempted(board, row, col) == 1) return 0; // location already attempted
-    int location = getIndex(board, row, col);
-    board->cells[location] = status;
-
-}
-
-
-void freeBoard(AttackBoard* board) {
+void freeAttackBoard(AttackBoard *board) {
     if(!board) return;
     free(board->cells);
-    free(board);
+    board->cells = NULL;
+    board->Rows = board->Cols = 0;
+}
+
+HitStatus getAttackAtLocation(const AttackBoard *board, int row, int col) {
+    return board->cells[row * board->Cols + col];
+}
+
+int wasAttackAlreadyAttempted(const AttackBoard *board, int row, int col) {
+    return getAttackAtLocation(board, row, col) != NOT_TRIED;
+}
+
+int updateAttackBoard(AttackBoard *board, int row, int col, HitStatus status) {
+    if(row < 0 || row >= board->Rows || col < 0 || col >= board->Cols) return 0;
+    if(status != HIT && status != MISS) return 0;
+    if(wasAttackAlreadyAttempted(board, row, col)) return 0;
+    board->cells[row * board->Cols + col] = status;
+    return 1;
 }
