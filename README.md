@@ -78,24 +78,3 @@ The network loop reports a peer quitting when it next reads the socket; it
 does not interrupt a local keyboard prompt. The wire format retains the
 original native `int` message layout, so peers must use matching integer sizes
 and byte order.
-
-## Tests
-
-With Python 3 and a GCC-compatible compiler in Linux/WSL:
-
-```sh
-python3 tests/run_tests.py
-```
-
-From PowerShell:
-
-```powershell
-wsl --exec python3 tests/run_tests.py
-```
-
-This builds with warnings treated as errors, AddressSanitizer, and
-UndefinedBehaviorSanitizer, then checks board boundaries, overlap, reversed
-placement, hit/miss tracking, cleanup, 500 randomized fleets, exhausted attack
-boards, CLI validation, a complete single-player game, and two-process
-multiplayer victory and quit paths. `make test` runs the tests with the normal
-build; `make check` runs the sanitizer suite.
